@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
 
-// Fail fast instead of silently "buffering" queries when not connected.
-// This makes real connection problems show up as clear errors immediately,
-// instead of a generic 10-second "buffering timed out" message.
-mongoose.set('bufferCommands', false);
+// Instead of disabling buffering entirely (which can cause queries to fail
+// immediately if they arrive a split-second before the connection is fully
+// ready), we keep buffering enabled but give it more time — Atlas + a cold
+// serverless start can occasionally take longer than the 10s default.
+mongoose.set('bufferTimeoutMS', 20000);
 
 // In serverless environments (Vercel), this module can be re-invoked many
 // times across different function executions, sometimes concurrently.

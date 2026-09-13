@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {
+  adminLogin,
   getPendingProperties,
   approveProperty,
   rejectProperty,
@@ -13,7 +14,12 @@ const {
 } = require('../controllers/adminController');
 const { protect, authorize } = require('../middleware/auth');
 
-// Every route in this file requires the user to be logged in AND have role "admin"
+// This route must stay ABOVE `router.use(protect, authorize('admin'))` below —
+// the admin doesn't have a token yet when logging in, so this one route has
+// to be public. It checks role === 'admin' itself inside the controller.
+router.post('/login', adminLogin);
+
+// Every route below this line requires the user to be logged in AND have role "admin"
 router.use(protect, authorize('admin'));
 
 router.get('/stats', getDashboardStats);

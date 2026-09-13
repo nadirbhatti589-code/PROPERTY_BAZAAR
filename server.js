@@ -39,6 +39,14 @@ app.use('/api/inquiries', require('./routes/inquiryRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+
+// Vercel runs this file as a serverless function and does NOT need app.listen() —
+// it imports the exported `app` and handles requests itself.
+// Locally (npm run dev), we still want app.listen() so you can test on localhost.
+if (process.env.VERCEL !== '1') {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+module.exports = app;

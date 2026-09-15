@@ -1,4 +1,5 @@
 const Favorite = require('../models/Favorite');
+const Property = require('../models/Property');
 
 // POST /api/favorites/:propertyId
 exports.addFavorite = async (req, res) => {
@@ -7,6 +8,7 @@ exports.addFavorite = async (req, res) => {
       user: req.user.id,
       property: req.params.propertyId,
     });
+    await Property.findByIdAndUpdate(req.params.propertyId, { $inc: { favoriteCount: 1 } });
     res.status(201).json({ message: 'Added to favorites', favorite });
   } catch (error) {
     if (error.code === 11000) {
@@ -19,7 +21,8 @@ exports.addFavorite = async (req, res) => {
 // DELETE /api/favorites/:propertyId
 exports.removeFavorite = async (req, res) => {
   try {
-    await Favorite.findOneAndDelete({ user: req.user.id, property: req.params.propertyId });
+    const favorite = await Favorite.findOneAndDelete({ user: req.user.id, property: req.params.propertyId });
+    if (favorite) await Property.findByIdAndUpdate(req.params.propertyId, { $inc: { favoriteCount: -1 } });
     res.status(200).json({ message: 'Removed from favorites' });
   } catch (error) {
     res.status(500).json({ message: 'Failed to remove favorite', error: error.message });

@@ -26,6 +26,7 @@ exports.sendInquiry = async (req, res) => {
       receiver: property.postedBy,
       message,
     });
+    await Property.findByIdAndUpdate(propertyId, { $inc: { inquiryCount: 1 } });
 
     res.status(201).json({ message: 'Inquiry sent', inquiry });
   } catch (error) {

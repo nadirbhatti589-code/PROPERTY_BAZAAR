@@ -71,7 +71,7 @@ exports.approveProperty = async (req, res) => {
   try {
     const property = await Property.findByIdAndUpdate(
       req.params.id,
-      { status: 'available', isVerified: true },
+      { status: 'active', isVerified: true, isDraft: false },
       { new: true }
     );
     if (!property) return res.status(404).json({ message: 'Property not found' });
@@ -171,7 +171,7 @@ exports.getDashboardStats = async (req, res) => {
   try {
     const [totalProperties, pendingProperties, totalUsers, pendingAgents, totalAgents] =
       await Promise.all([
-        Property.countDocuments({ status: 'available' }),
+        Property.countDocuments({ status: { $in: ['active', 'available'] } }),
         Property.countDocuments({ status: 'pending_approval' }),
         User.countDocuments(),
         Agent.countDocuments({ verifiedStatus: 'pending' }),

@@ -102,7 +102,13 @@ const PropertySchema = new mongoose.Schema(
     },
 
     images: {
-      type: [String], // array of image URLs (Cloudinary/S3)
+      type: [
+        {
+          url: { type: String, required: true },
+          publicId: { type: String, default: null },
+          order: { type: Number, default: 0 },
+        },
+      ],
       default: [],
     },
     videoUrl: {
@@ -129,9 +135,11 @@ const PropertySchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ['available', 'sold', 'rented', 'pending_approval', 'rejected'],
+      enum: ['active', 'available', 'sold', 'rented', 'expired', 'draft', 'pending_approval', 'rejected'],
       default: 'pending_approval',
     },
+    isDraft: { type: Boolean, default: false },
+    expiresAt: { type: Date, default: null },
 
     isVerified: {
       type: Boolean, // admin-verified listing (ownership/documents checked)
@@ -147,6 +155,8 @@ const PropertySchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    favoriteCount: { type: Number, default: 0 },
+    inquiryCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

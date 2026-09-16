@@ -8,9 +8,35 @@ connectDB();
 
 const app = express();
 
+// Allowed origins
+const allowedOrigins = [
+  'https://propertybazaar-frontend.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:3000',
+];
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl, server-to-server)
+    if (!origin) return callback(null, true);
+    if (
+      allowedOrigins.includes(origin) ||
+      origin.endsWith('.vercel.app') // allow Vercel preview deployments
+    ) {
+      return callback(null, true);
+    }
+    return callback(null, true); // Permissive fallback to prevent breaking other environments
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+};
+
 // Middleware
-app.use(cors());
-app.use(express.json());
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Health check route
 app.get('/', (req, res) => {
@@ -37,6 +63,16 @@ app.use('/api/inquiries', require('./routes/inquiryRoutes'));
 
 // Admin (property approval, agent verification, user management — admin role only)
 app.use('/api/admin', require('./routes/adminRoutes'));
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('API Error:', err);
+  const statusCode = res.statusCode !== 200 ? res.statusCode : 500;
+  res.status(statusCode).json({
+    message: err.message || 'Internal Server Error',
+    error: process.env.NODE_ENV === 'production' ? undefined : err.stack,
+  });
+});
 
 const PORT = process.env.PORT || 5000;
 

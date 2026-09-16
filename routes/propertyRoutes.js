@@ -24,8 +24,8 @@ router.post('/cron/expire', expireListings);
 
 router.get('/:id', getPropertyById);
 
-// Protected routes — only sellers and agents can create listings
-router.post('/', protect, authorize('seller', 'agent'), createProperty);
+// Protected routes — authenticated users can create listings
+router.post('/', protect, authorize('seller', 'agent', 'admin', 'buyer'), createProperty);
 router.put('/:id', protect, updateProperty);
 router.patch('/:id/status', protect, setPropertyStatus);
 router.post('/:id/renew', protect, renewProperty);

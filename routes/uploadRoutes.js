@@ -28,7 +28,7 @@ const uploadToCloudinary = (fileBuffer) => {
 router.post(
   '/',
   protect,
-  authorize('seller', 'agent', 'admin'),
+  authorize('seller', 'agent', 'admin', 'buyer'),
   (req, res, next) => {
     upload.array('images', 10)(req, res, (err) => {
       if (err) {
